@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+import uuid
+from datetime import datetime, timedelta, timezone
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -303,6 +305,49 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+class RestockingItem(BaseModel):
+    sku: str
+    name: str
+    quantity: int
+    unit_price: float
+
+class RestockingOrderRequest(BaseModel):
+    items: List[RestockingItem]
+
+_restocking_order_counter = [0]
+
+@app.post("/api/restocking-orders")
+def create_restocking_order(request: RestockingOrderRequest):
+    """Create a restocking order from selected demand forecast items"""
+    _restocking_order_counter[0] += 1
+    now = datetime.now(timezone.utc)
+    expected_delivery = now + timedelta(days=14)
+
+    items_payload = [
+        {"sku": item.sku, "name": item.name, "quantity": item.quantity, "unit_price": item.unit_price}
+        for item in request.items
+    ]
+    total_value = sum(item.quantity * item.unit_price for item in request.items)
+    year = now.strftime("%Y")
+    order_number = f"RST-{year}-{_restocking_order_counter[0]:04d}"
+
+    order = {
+        "id": str(uuid.uuid4()),
+        "order_number": order_number,
+        "customer": "Internal Restocking",
+        "items": items_payload,
+        "status": "Restocking",
+        "order_date": now.strftime("%Y-%m-%dT%H:%M:%S"),
+        "expected_delivery": expected_delivery.strftime("%Y-%m-%dT%H:%M:%S"),
+        "total_value": round(total_value, 2),
+        "actual_delivery": None,
+        "warehouse": None,
+        "category": None,
+    }
+    orders.append(order)
+    return order
+
 
 if __name__ == "__main__":
     import uvicorn
