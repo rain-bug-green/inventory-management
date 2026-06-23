@@ -25,6 +25,10 @@
           <div class="stat-label">{{ t('status.backordered') }}</div>
           <div class="stat-value">{{ getOrdersByStatus('Backordered').length }}</div>
         </div>
+        <div class="stat-card restocking">
+          <div class="stat-label">{{ t('status.restocking') }}</div>
+          <div class="stat-value">{{ getOrdersByStatus('Restocking').length }}</div>
+        </div>
       </div>
 
       <div class="card">
@@ -138,7 +142,8 @@ export default {
         'Delivered': 'success',
         'Shipped': 'info',
         'Processing': 'warning',
-        'Backordered': 'danger'
+        'Backordered': 'danger',
+        'Restocking': 'status-restocking'
       }
       return statusMap[status] || 'info'
     }
@@ -275,5 +280,11 @@ export default {
 .item-meta {
   font-size: 0.813rem;
   color: #64748b;
+}
+
+.status-restocking {
+  background: #3b0764;
+  color: #d8b4fe;
+  border: 1px solid #a855f7;
 }
 </style>

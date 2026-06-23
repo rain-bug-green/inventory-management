@@ -25,6 +25,9 @@
           <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
             Reports
           </router-link>
+          <router-link to="/restocking" :class="{ active: $route.path === '/restocking' }">
+            Restocking
+          </router-link>
         </nav>
         <LanguageSwitcher />
         <ProfileMenu
@@ -341,6 +344,10 @@ body {
 
 .stat-card.info .stat-value {
   color: #2563eb;
+}
+
+.stat-card.restocking .stat-value {
+  color: #9333ea;
 }
 
 .card {
